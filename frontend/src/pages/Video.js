@@ -1,10 +1,28 @@
-import Basic from "./Basic";
-import VideoFromDevice from "../components/VideoFromDevice";
+import React from "react";
+import Webcam from "react-webcam";
 
-export default function Video() {
-    return (<Basic >
-            <VideoFromDevice/>
+export default function Video (){
+    const webcamRef = React.useRef(null);
+    const [imgSrc, setImgSrc] = React.useState(null);
 
-        </Basic>
+    const capture = React.useCallback(() => {
+        const imageSrc = webcamRef.current.getScreenshot();
+        setImgSrc(imageSrc);
+    }, [webcamRef, setImgSrc]);
+
+    return (
+        <>
+            <Webcam
+                audio={false}
+                ref={webcamRef}
+                screenshotFormat="image/jpeg"
+            />
+            <button onClick={capture}>Capture photo</button>
+            {imgSrc && (
+                <img
+                    src={imgSrc}
+                />
+            )}
+        </>
     );
-}
+};

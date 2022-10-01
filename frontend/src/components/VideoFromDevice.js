@@ -1,4 +1,4 @@
-import { Table } from "react-bootstrap";
+import {Container, Table} from "react-bootstrap";
 
 
 export default function VideoFromDevice() {
@@ -9,20 +9,24 @@ export default function VideoFromDevice() {
     let video_arr = []
 
     for (let vid of list_videos){
-        video_arr.push( <div key={vid["src"]} ><video src={vid["src"]} controls width="40%">
+        video_arr.push( <div key={vid["src"]}><video src={vid["src"]} controls width="40%">
             Sorry, your browser doesn't support embedded videos.
         </video></div>)
     }
 
 
     return (
-        <Table>
-            <thead />
-            <tbody>
-            {video_arr}
+        <Container>
+            <Table>
+                <thead />
+                <tbody>
+                {video_arr}
 
-            </tbody>
-        </Table>
+                </tbody>
+            </Table>
+
+
+        </Container>
 
 
 
