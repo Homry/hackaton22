@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
-import imageio
-from processing.convert_video import convert_image, convert_video
+from processing.convert_video import convert_image, convert_video_to_gif
 
 def process_test_image(filename: str):
     img = cv2.imread(filename)
@@ -20,7 +19,7 @@ def process_from_camera():
         ret, frame = vid.read()
         if not ret:
             continue
-        converted_image = convert_image(frame)
+        converted_image = convert_image(frame, "yellow", "cat")
         if converted_image is not None:
             cv2.imshow("Emotinal", converted_image)
         cv2.imshow("Original", frame)
@@ -40,13 +39,12 @@ def record_and_convert_video():
         frames.append(frame)
         if len(frames) >= seconds * frame_rate:
             break
-    result_video = convert_video(np.array(frames), frame_rate)
-    if len(result_video) == 0:
-        return None
-    new_frame_rate = round(len(result_video) / seconds)
-    with imageio.get_writer("../test_res_video.gif", mode="I") as writer:
-        for frame in result_video:
-            writer.append_data(cv2.cvtColor(frame.astype(np.uint8), cv2.COLOR_BGR2RGB))
+    result_video = convert_video_to_gif (np.array(frames), "yellow", "cat")
+    if result_video is None:
+        print("Video is None")
+        return
+    with open("../test_res_video.gif", "wb") as f:
+        f.write(result_video)
 
 
 if __name__ == "__main__":
