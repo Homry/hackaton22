@@ -1,6 +1,8 @@
 import numpy as np
 import cv2
 import mediapipe as mp
+import imageio
+import io
 from processing.data import Point, FaceItem
 from processing.presets import CatPreset, LittleDevilPreset
 
@@ -109,7 +111,7 @@ def draw_lines(image, size, color, draw_lips=False):
             cv2.drawContours(image, [np.array([transform_func(p) for p in FACE_ITEMS["inner_lips"].saved_landmarks])], -1, np.array(color, dtype=np.uint8) * 0.75, -1)
             FACE_ITEMS["inner_lips"]._always_draw_lins(image, transform_func)
         else:
-            FACE_ITEMS["lips_inner_lower"]._always_draw_lins(image, transform_func)
+            FACE_ITEMS["lips_inner_upper"]._always_draw_lins(image, transform_func)
 
 
 def resize_all_points(face_size):
@@ -150,9 +152,11 @@ def apply_preset(preset_name: str, image, size, color):
         LittleDevilPreset.apply_preset(image, FACE_ITEMS["left_brow"], FACE_ITEMS["right_brow"], transform_func, color)
 
 
-def convert_image(image: 'np.ndarry[float]'):
+def convert_image(image: 'np.ndarry[float]', color_name, preset_name):
     size = (600, 600, 3)
-    color = COLORS["red"]
+    if COLORS.get(color_name) is None:
+        return None
+    color = COLORS[color_name]
     new_image = draw_cirlce(size, color)
     res = get_coords_from_face(image)
     if res is None:
@@ -160,18 +164,26 @@ def convert_image(image: 'np.ndarry[float]'):
     face_size = res
     resize_all_points(face_size)
     draw_lines(new_image, size, color, True)
-    apply_preset("little_devil", new_image, size, color)
+    apply_preset(preset_name, new_image, size, color)
     return new_image
 
 
-def convert_video(video: 'np.ndarray[float]', frame_rate):
-    if frame_rate < 3:
-        return None
+def convert_video(video: 'np.ndarray[float]', color_name, preset_name, skip_frames=None):
+    step = 1 if skip_frames is None else skip_frames
     res_video = []
-    for i in range(0, len(video), frame_rate // 3):
+    for i in range(0, len(video), step):
         cur_frame = video[i]
-        converted = convert_image(cur_frame)
+        converted = convert_image(cur_frame, color_name, preset_name)
         if converted is None:
             continue
         res_video.append(converted)
-    return np.array(res_video)
+    return res_video
+
+
+def convert_video_to_gif(video: 'np.ndarray[float]', color_name, preset_name):
+    new_video = convert_video(video, color_name, preset_name, 10)
+    if new_video is None:
+        return None
+    new_video = [cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) for frame in new_video]
+    output = imageio.mimsave("<bytes>", new_video, format="gif")
+    return output
