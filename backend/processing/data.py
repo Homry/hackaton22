@@ -9,7 +9,7 @@ class Point:
 
 class FaceItem:
 
-    def __init__(self, key: str, indecies: list, cycled: bool, tickness: int = 3, draw: bool = True, color: tuple[int, int, int] = (0, 0, 0)):
+    def __init__(self, key: str, indecies: list, cycled: bool, tickness: int = 3, draw: bool = True, color : 'tuple[int, int, int]' = (0, 0, 0)):
         self.key = key
         self.mp_indecies = indecies
         self.cycled = cycled

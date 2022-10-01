@@ -5,4 +5,5 @@ passlib
 opencv-python==4.5.5.64
 mediapipe==0.8.10.1
 imageio==2.22.0
+Pillow
 
