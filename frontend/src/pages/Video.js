@@ -1,9 +1,9 @@
 import Basic from "./Basic";
+import VideoFromDevice from "../components/VideoFromDevice";
 
 export default function Video() {
-
     return (<Basic >
-            <h1>Video</h1>
+            <VideoFromDevice/>
 
         </Basic>
     );
