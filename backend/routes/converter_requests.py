@@ -12,7 +12,7 @@ import gridfs
 def decode_image(raw):
     image = np.asarray(Image.open(io.BytesIO(base64.b64decode(raw.split(',')[1]))).convert('RGB'))
     print(image.shape)
-    return converter(image)
+    return converter(image, "red", "cat")
 
 
 @app.route('/convert_image', methods=['POST'])
