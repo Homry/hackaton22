@@ -6,6 +6,8 @@ import Video from "./pages/Video";
 import Storage from "./pages/Storage";
 import MyPage from "./pages/MyPage";
 import useToken from "./login/useToken";
+import Basic from "./pages/Basic";
+
 
 function App() {
    const {token, setToken} = useToken();
@@ -17,14 +19,16 @@ function App() {
   return (
       <BrowserRouter>
           <Routes>
+
               <Route path="/chat" element={<Chat user={token}/>}/>
-              <Route path="/make" element={<Video user={token}/>}/>
+              <Route path="/video" element={<Video user={token}/>}/>
               <Route path="/storage" element={<Storage user={token}/>}/>
               <Route path="/" element={<MyPage user={token}/>}/>
+              <Route path="/basic" element={<Basic user={token}/>}/>
+
 
           </Routes>
       </BrowserRouter>
-
   );
 }
 

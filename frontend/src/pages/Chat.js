@@ -1,5 +1,10 @@
+import Basic from "./Basic";
+
 export default function Chat() {
 
-    return (<h1>Chat</h1>
+    return (<Basic >
+            <h1>Chat</h1>
+
+        </Basic>
     );
 }

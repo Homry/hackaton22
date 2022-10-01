@@ -1,5 +1,11 @@
+import Basic from "./Basic";
+import VideoFromDevice from "../components/VideoFromDevice";
+
 export default function Storage() {
 
-    return (<h1>Storage</h1>
+    return (<Basic >
+            <VideoFromDevice/>
+
+        </Basic>
     );
 }
