@@ -94,10 +94,16 @@ def get_coords_from_face(image):
 
 
 def draw_lines(image, points: dict, size):
+    coeff = 0.8
+    h, w = size[:2]
+    offset_x = round(w * (1 - coeff) / 2)
+    offset_y = round(h * (1 - coeff) / 2)
+    h *= coeff
+    w *= coeff
     for key, coords in points.items():
         for i in range(len(coords)):
-            pt1 = (round(coords[i].x * size[1]), round(coords[i].y * size[0]))
-            pt2 = (round(coords[(i + 1) % len(coords)].x * size[1]), round(coords[(i + 1) % len(coords)].y  * size[0]))
+            pt1 = (round(coords[i].x * h) + offset_x, round(coords[i].y * w) + offset_y)
+            pt2 = (round(coords[(i + 1) % len(coords)].x * h) + offset_x, round(coords[(i + 1) % len(coords)].y  * w) + offset_y)
             cv2.line(image, pt1, pt2, (0, 0, 0), 3)
 
 
