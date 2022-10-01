@@ -29,6 +29,8 @@ silhouette = [
     172, 58,  132, 93,  234, 127, 162, 21,  54,  103, 67,  109
 ]
 
+EPS = 0.02
+
 ### COLOR IS BGR!!!!!
 
 def draw_cirlce(size):
@@ -55,6 +57,7 @@ def get_coords_from_face(image):
         "lips": [],
         "silhouette": [],
     }
+    lips_inner = [[], []]
     if res.multi_face_landmarks:
         for face_landmarks in res.multi_face_landmarks:
             lands = face_landmarks.landmark
@@ -72,6 +75,13 @@ def get_coords_from_face(image):
                 result_lines["left_eye"].append(lands[index])
             for index in leftEyeLower0:
                 result_lines["left_eye"].insert(0, lands[index])
+
+            # inner lips
+            for index in lipsLowerInner:
+                lips_inner[0].insert(0, lands[index])
+            for index in lipsUpperInner:
+                lips_inner[1].append(lands[index])
+            # face contour
             sil = np.array([(lands[index].x, lands[index].y) for index in silhouette])
             min_x = min(sil[:, 0])
             max_x = max(sil[:, 0])
@@ -80,7 +90,7 @@ def get_coords_from_face(image):
             face_size = (min_x, max_x, min_y, max_y)
     if len(result_lines["nose"]) == 0:
         return None
-    return result_lines, face_size
+    return result_lines, face_size, lips_inner
 
 
 def draw_lines(image, points: dict, size):
@@ -93,19 +103,26 @@ def draw_lines(image, points: dict, size):
 
 def resize_all_points(face_points, face_size):
     min_x, max_x, min_y, max_y = face_size
-    print(face_size)
     passed_idx = set()
     x_len = max_x - min_x
     y_len = max_y - min_y
     for key, values in face_points.items():
         for v in values:
-            old = (v.x, v.y)
             v.x = (v.x - min_x) / x_len
             v.y = (v.y - min_y) / y_len
-            if v.x > 1:
-                print("Error:", old, x_len, min_x)
-                print("Error:", old, y_len, min_y)
 
+
+def check_open_mouth(draw_image, lips_inner):
+    upper, lower = lips_inner
+    for i in range(min(len(upper), len(lower))):
+        if abs(upper[i].y - lower[i].y) > EPS:
+            text = "Mouth is open"
+            color = (0, 0, 255)
+            break
+    else:
+        text = "Mouth is closed"
+        color = (0, 255, 0)
+    cv2.putText(draw_image, text, (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1.0, color)
 
 
 def convert_image(image: 'np.ndarry[float]'):
@@ -114,9 +131,21 @@ def convert_image(image: 'np.ndarry[float]'):
     res = get_coords_from_face(image)
     if res is None:
         return None
-    face_points, face_size = res
-    # print([(p.x, p.y) for p in face_points["lips"]])
+    face_points, face_size, lips_inner = res
     resize_all_points(face_points,face_size)
-    # print([(p.x, p.y) for p in face_points["lips"]])
     draw_lines(new_image, face_points, size)
+    check_open_mouth(new_image, lips_inner)
     return new_image
+
+
+def convert_video(video: 'np.ndarray[float]', frame_rate):
+    if frame_rate < 3:
+        return None
+    res_video = []
+    for i in range(0, len(video), frame_rate // 3):
+        cur_frame = video[i]
+        converted = convert_image(cur_frame)
+        if converted is None:
+            continue
+        res_video.append(converted)
+    return np.array(res_video)
