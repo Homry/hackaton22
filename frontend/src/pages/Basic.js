@@ -15,7 +15,7 @@ export default function Basic(props) {
                             <MenuItem>Сообщения <Link to="/chat" /></MenuItem>
                             <MenuItem>Видео <Link to="/video" /></MenuItem>
                             <MenuItem>Галерея <Link to="/storage" /></MenuItem>
-                            <MenuItem>Профиль <Link to="/mypage" /></MenuItem>
+                            <MenuItem>Профиль <Link to="/" /></MenuItem>
                             <footer
                                 style={{
                                     position: "fixed",
@@ -37,7 +37,7 @@ export default function Basic(props) {
 
             </Row>
 
-    </Container>
+        </Container>
 
-);
+    );
 }
