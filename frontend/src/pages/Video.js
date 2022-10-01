@@ -1,5 +1,6 @@
 import React from "react";
 import Webcam from "react-webcam";
+import axios from "axios";
 
 export default function Video (props){
     const webcamRef = React.useRef(null);
@@ -7,7 +8,18 @@ export default function Video (props){
 
     const capture = React.useCallback(() => {
         const imageSrc = webcamRef.current.getScreenshot();
-        setImgSrc(imageSrc);
+        console.log(typeof(imageSrc))
+
+        fetch(`http://127.0.0.1:5000/convert_image`, {
+            method: "POST",
+            body: JSON.stringify(imageSrc),
+            headers: {
+                "Content-type": "application/json; charset=UTF-8"
+            }
+        }).then(function (response){
+            console.log('image res = ',response);
+        })
+
     }, [webcamRef, setImgSrc]);
 
     return (
@@ -15,7 +27,7 @@ export default function Video (props){
             <Webcam
                 audio={false}
                 ref={webcamRef}
-                screenshotFormat="image/jpeg"
+                screenshotFormat="image/png"
             />
             <button onClick={capture}>Capture photo</button>
             {imgSrc && (

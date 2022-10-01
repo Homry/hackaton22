@@ -11,7 +11,6 @@ import Basic from "./pages/Basic";
 
 function App() {
    const {token, setToken} = useToken();
-    console.log("token___", token)
     if (!token){
        return ( <Login setSession={setToken}/>)
     }
@@ -24,7 +23,7 @@ function App() {
               <Route path="/video" element={<Video user={token}/>}/>
               <Route path="/storage" element={<Storage user={token}/>}/>
               <Route path="/" element={<MyPage user={token}/>}/>
-              <Route path="/basic" element={<Basic user={token}/>}/>
+              <Route path="/basic" element={<Basic />}/>
 
 
           </Routes>
