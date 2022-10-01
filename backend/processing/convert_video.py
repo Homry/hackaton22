@@ -40,6 +40,7 @@ FACE_ITEMS = {
         ], True, draw=False),
     "leye": FaceItem("leye", [469, 470, 471, 472], True, tickness=1),
     "reye": FaceItem("reye", [474, 475, 476, 477], True, tickness=1),
+    "cheeks": FaceItem("cheeks", [425, 205], False, tickness=1, draw=False),
 }
 
 EPS = 0.02
@@ -90,7 +91,7 @@ def get_coords_from_face(image):
     return face_size
 
 
-def draw_lines(image, size, draw_lips=False):
+def draw_lines(image, size, color, draw_lips=False):
     coeff = 0.8
     h, w = size[:2]
     offset_x = round(w * (1 - coeff) / 2)
@@ -105,6 +106,7 @@ def draw_lines(image, size, draw_lips=False):
         face_item.draw_lines(image, transform_func)
     if draw_lips:
         if check_open_mouth(image):
+            cv2.drawContours(image, [np.array([transform_func(p) for p in FACE_ITEMS["inner_lips"].saved_landmarks])], -1, np.array(color, dtype=np.uint8) * 0.75, -1)
             FACE_ITEMS["inner_lips"]._always_draw_lins(image, transform_func)
         else:
             FACE_ITEMS["lips_inner_lower"]._always_draw_lins(image, transform_func)
@@ -127,19 +129,11 @@ def check_open_mouth(draw_image):
     upper, lower = FACE_ITEMS["lips_inner_upper"].saved_landmarks, FACE_ITEMS["lips_inner_lower"].saved_landmarks
     for i in range(min(len(upper), len(lower))):
         if abs(upper[i].y - lower[i].y) > EPS:
-            text = "Mouth is open"
-            color = (0, 0, 255)
-            ret = True
-            break
-    else:
-        text = "Mouth is closed"
-        color = (0, 255, 0)
-        ret = False
-    cv2.putText(draw_image, text, (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1.0, color)
-    return ret
+            return True
+    return False
 
 
-def apply_preset(preset_name: str, image, size):
+def apply_preset(preset_name: str, image, size, color):
     coeff = 0.8
     h, w = size[:2]
     offset_x = round(w * (1 - coeff) / 2)
@@ -151,19 +145,20 @@ def apply_preset(preset_name: str, image, size):
         return (round(point.x * h) + offset_x, round(point.y * w) + offset_y)
 
     if preset_name == "cat":
-        CatPreset.apply_preset(image, FACE_ITEMS["left_brow"], FACE_ITEMS["right_brow"], transform_func)
+        CatPreset.apply_preset(image, FACE_ITEMS["left_brow"], FACE_ITEMS["right_brow"], FACE_ITEMS["cheeks"], transform_func, color)
 
 
 def convert_image(image: 'np.ndarry[float]'):
     size = (500, 500, 3)
-    new_image = draw_cirlce(size, COLORS["pink"])
+    color = COLORS["red"]
+    new_image = draw_cirlce(size, color)
     res = get_coords_from_face(image)
     if res is None:
         return None
     face_size = res
     resize_all_points(face_size)
-    draw_lines(new_image, size, True)
-    apply_preset("cat", new_image, size)
+    draw_lines(new_image, size, color, True)
+    apply_preset("cat", new_image, size, color)
     return new_image
 
 
