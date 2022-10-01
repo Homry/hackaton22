@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 import mediapipe as mp
 from processing.data import Point, FaceItem
-from processing.presets import CatPreset
+from processing.presets import CatPreset, LittleDevilPreset
 
 
 mesh_detector = detector = mp.solutions.face_mesh.FaceMesh(
@@ -44,6 +44,7 @@ FACE_ITEMS = {
 }
 
 EPS = 0.02
+DRAW_COEFF = 0.7
 
 COLORS = {
     "yellow": (0, 255, 255),
@@ -61,7 +62,6 @@ def draw_cirlce(size, fill_color):
     image = np.ones(size, dtype=np.uint8) * 255
     h, w = size[:2]
     image = cv2.circle(image, (w // 2, h // 2), round(w // 2 * coeff), fill_color, -1)
-    # image = cv2.circle(image, (w // 2, h // 2), round(w // 2 * coeff), (0, 0, 255), -1)
     image = cv2.circle(image, (w // 2, h // 2), round(w // 2 * coeff), (0, 0, 0), 3)
     return image
 
@@ -92,7 +92,7 @@ def get_coords_from_face(image):
 
 
 def draw_lines(image, size, color, draw_lips=False):
-    coeff = 0.8
+    coeff = DRAW_COEFF
     h, w = size[:2]
     offset_x = round(w * (1 - coeff) / 2)
     offset_y = round(h * (1 - coeff) / 2)
@@ -134,7 +134,7 @@ def check_open_mouth(draw_image):
 
 
 def apply_preset(preset_name: str, image, size, color):
-    coeff = 0.8
+    coeff = DRAW_COEFF
     h, w = size[:2]
     offset_x = round(w * (1 - coeff) / 2)
     offset_y = round(h * (1 - coeff) / 2)
@@ -146,10 +146,12 @@ def apply_preset(preset_name: str, image, size, color):
 
     if preset_name == "cat":
         CatPreset.apply_preset(image, FACE_ITEMS["left_brow"], FACE_ITEMS["right_brow"], FACE_ITEMS["cheeks"], transform_func, color)
+    elif preset_name == "little_devil":
+        LittleDevilPreset.apply_preset(image, FACE_ITEMS["left_brow"], FACE_ITEMS["right_brow"], transform_func, color)
 
 
 def convert_image(image: 'np.ndarry[float]'):
-    size = (500, 500, 3)
+    size = (600, 600, 3)
     color = COLORS["red"]
     new_image = draw_cirlce(size, color)
     res = get_coords_from_face(image)
@@ -158,7 +160,7 @@ def convert_image(image: 'np.ndarry[float]'):
     face_size = res
     resize_all_points(face_size)
     draw_lines(new_image, size, color, True)
-    apply_preset("cat", new_image, size, color)
+    apply_preset("little_devil", new_image, size, color)
     return new_image
 
 
