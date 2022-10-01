@@ -165,7 +165,7 @@ def convert_image(image: 'np.ndarry[float]', color_name, preset_name):
     resize_all_points(face_size)
     draw_lines(new_image, size, color, True)
     apply_preset(preset_name, new_image, size, color)
-    return new_image
+    return cv2.cvtColor(new_image, cv2.COLOR_BGR2RGB)
 
 
 def convert_video(video: 'np.ndarray[float]', color_name, preset_name, skip_frames=None):
