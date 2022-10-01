@@ -3,8 +3,8 @@ import cv2
 
 @dataclass
 class Point:
-    x: int
-    y: int
+    x: float
+    y: float
 
 
 class FaceItem:
@@ -21,7 +21,8 @@ class FaceItem:
     def process_landmarks(self, landmarks):
         self.saved_landmarks.clear()
         for index in self.mp_indecies:
-            self.saved_landmarks.append(landmarks[index])
+            # self.saved_landmarks.append(landmarks[index])
+            self.saved_landmarks.append(Point(landmarks[index].x, landmarks[index].y))
 
     def resize_saved_points(self, transform_func: callable):
         for point in self.saved_landmarks:
@@ -32,6 +33,9 @@ class FaceItem:
     def draw_lines(self, image, to_opencv_point: callable):
         if not self.draw:
             return
+        self._always_draw_lins(image, to_opencv_point)
+
+    def _always_draw_lins(self, image, to_opencv_point: callable):
         last_index = len(self.saved_landmarks)
         if not self.cycled:
             last_index -= 1

@@ -56,4 +56,4 @@ if __name__ == "__main__":
     # record_and_convert_video()
     process_from_camera()
     # process_test_image("../test_image.png")
-    # process_test_image("../test_image2.jpeg")
+    # process_test_image("../test_image3.jpeg")
