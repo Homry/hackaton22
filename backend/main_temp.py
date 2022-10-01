@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 from processing.convert_video import convert_image, convert_video
 
-def process_test_image():
-    img = cv2.imread("../test_image.png")
+def process_test_image(filename: str):
+    img = cv2.imread(filename)
     new_img = convert_image(img)
     if new_img is None:
         print("No face")
@@ -55,3 +55,5 @@ def record_and_convert_video():
 if __name__ == "__main__":
     # record_and_convert_video()
     process_from_camera()
+    # process_test_image("../test_image.png")
+    # process_test_image("../test_image2.jpeg")
