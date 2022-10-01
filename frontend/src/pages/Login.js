@@ -1,5 +1,11 @@
+import Basic from "./Basic";
+
 export default function Login() {
 
-    return (<h1>Login</h1>
+    return (<Basic >
+        <h1>Login</h1>
+
+    </Basic>
+
     );
 }

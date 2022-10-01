@@ -4,6 +4,7 @@ import Chat from "./pages/Chat";
 import Video from "./pages/Video";
 import Storage from "./pages/Storage";
 import MyPage from "./pages/MyPage";
+import Basic from "./pages/Basic";
 
 function App() {
   return (
@@ -13,15 +14,16 @@ function App() {
               </Route>
               <Route path="/chat" element={<Chat/>}>
               </Route>
-              <Route path="/make" element={<Video/>}>
+              <Route path="/video" element={<Video/>}>
               </Route>
               <Route path="/storage" element={<Storage/>}>
               </Route>
               <Route path="/mypage" element={<MyPage/>}>
               </Route>
+              <Route path="/basic" element={<Basic/>}>
+              </Route>
           </Routes>
       </BrowserRouter>
-
   );
 }
 

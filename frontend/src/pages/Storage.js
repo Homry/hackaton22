@@ -1,5 +1,10 @@
+import Basic from "./Basic";
+
 export default function Storage() {
 
-    return (<h1>Storage</h1>
+    return (<Basic >
+            <h1>Storage</h1>
+
+        </Basic>
     );
 }
