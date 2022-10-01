@@ -1,5 +1,9 @@
-export default function MyPage() {
+import {useEffect, useState} from 'react'
 
-    return (<h1>My page</h1>
+
+export default function MyPage(props) {
+    console.log(props.user)
+
+    return (<h1>{}</h1>
     );
 }

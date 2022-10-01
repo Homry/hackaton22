@@ -1,10 +1,13 @@
-from flask import Flask, request
+from flask import Flask, request, session, jsonify
 from users.models import User
-from app import app
-
+from app import app, db
 
 @app.route('/user/singup', methods=['POST'])
 def singup():
-    data = request.get_json()
-    print(data)
-    return User().singup(data)
+    return User().singup(request.get_json())
+
+@app.route('/user/login', methods=['POST'])
+def login():
+    return User().login(request.get_json())
+
+
