@@ -7,3 +7,4 @@ mediapipe==0.8.10.1
 imageio==2.22.0
 Pillow
 
+

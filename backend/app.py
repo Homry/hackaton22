@@ -1,10 +1,11 @@
 import numpy as np
-from flask import Flask, request, make_response
+from flask import Flask, request, make_response, send_file
 from flask_cors import CORS
 import pymongo
 import base64
 from PIL import Image
 import io
+import tempfile
 from processing import convert_image as converter
 
 app = Flask(__name__)
@@ -31,9 +32,18 @@ def convert_image():
     image = np.asarray(Image.open(io.BytesIO(image)).convert('RGB'))
     print(image.shape)
     image = converter(image)
-    response = make_response(image.tobytes())
-    response.headers.set('Content-Type', 'application/octet-stream')
-    # response.headers.set('Content-Disposition', 'attachment', filename = 'np-array.bin')
-    return response
+
+
+    if image is not None:
+        with tempfile.NamedTemporaryFile(mode="wb", suffix='.png') as jpg:
+            image = Image.fromarray(image)
+            print(jpg.name)
+            image.save(jpg.name)
+            return send_file(jpg.name, mimetype='image/gif')
+
+
+        # response.headers.set('Content-Disposition', 'attachment', filename = 'np-array.bin')
+
+    return {'error': 'not find face in the image'}, 408
     #return {'image': "test"}
 
