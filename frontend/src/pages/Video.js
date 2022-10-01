@@ -1,6 +1,5 @@
 import React, {useState} from "react";
 import Webcam from "react-webcam";
-import Basic from "./Basic";
 
 
 export default function Video (props){
@@ -47,7 +46,7 @@ export default function Video (props){
 
     return (
 
-        <Basic>
+        <>
             <Webcam
                 audio={false}
                 ref={webcamRef}
@@ -67,7 +66,7 @@ export default function Video (props){
                     src={imgSrc}
                 />
             )}
-        </Basic>
+        </>
 
     );
 };

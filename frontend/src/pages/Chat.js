@@ -1,10 +1,7 @@
-import Basic from "./Basic";
 
-export default function Chat(props) {
+export default function Chat() {
 
-    return (<Basic >
+    return (
             <h1>Chat</h1>
-
-        </Basic>
     );
 }

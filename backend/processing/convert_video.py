@@ -1,8 +1,10 @@
 import numpy as np
 import cv2
 import mediapipe as mp
+import imageio
+import io
 from processing.data import Point, FaceItem
-from processing.presets import CatPreset
+from processing.presets import CatPreset, LittleDevilPreset
 
 
 mesh_detector = detector = mp.solutions.face_mesh.FaceMesh(
@@ -40,9 +42,11 @@ FACE_ITEMS = {
         ], True, draw=False),
     "leye": FaceItem("leye", [469, 470, 471, 472], True, tickness=1),
     "reye": FaceItem("reye", [474, 475, 476, 477], True, tickness=1),
+    "cheeks": FaceItem("cheeks", [425, 205], False, tickness=1, draw=False),
 }
 
 EPS = 0.02
+DRAW_COEFF = 0.7
 
 COLORS = {
     "yellow": (0, 255, 255),
@@ -60,7 +64,6 @@ def draw_cirlce(size, fill_color):
     image = np.ones(size, dtype=np.uint8) * 255
     h, w = size[:2]
     image = cv2.circle(image, (w // 2, h // 2), round(w // 2 * coeff), fill_color, -1)
-    # image = cv2.circle(image, (w // 2, h // 2), round(w // 2 * coeff), (0, 0, 255), -1)
     image = cv2.circle(image, (w // 2, h // 2), round(w // 2 * coeff), (0, 0, 0), 3)
     return image
 
@@ -90,8 +93,8 @@ def get_coords_from_face(image):
     return face_size
 
 
-def draw_lines(image, size, draw_lips=False):
-    coeff = 0.8
+def draw_lines(image, size, color, draw_lips=False):
+    coeff = DRAW_COEFF
     h, w = size[:2]
     offset_x = round(w * (1 - coeff) / 2)
     offset_y = round(h * (1 - coeff) / 2)
@@ -105,9 +108,10 @@ def draw_lines(image, size, draw_lips=False):
         face_item.draw_lines(image, transform_func)
     if draw_lips:
         if check_open_mouth(image):
+            cv2.drawContours(image, [np.array([transform_func(p) for p in FACE_ITEMS["inner_lips"].saved_landmarks])], -1, np.array(color, dtype=np.uint8) * 0.75, -1)
             FACE_ITEMS["inner_lips"]._always_draw_lins(image, transform_func)
         else:
-            FACE_ITEMS["lips_inner_lower"]._always_draw_lins(image, transform_func)
+            FACE_ITEMS["lips_inner_upper"]._always_draw_lins(image, transform_func)
 
 
 def resize_all_points(face_size):
@@ -127,20 +131,12 @@ def check_open_mouth(draw_image):
     upper, lower = FACE_ITEMS["lips_inner_upper"].saved_landmarks, FACE_ITEMS["lips_inner_lower"].saved_landmarks
     for i in range(min(len(upper), len(lower))):
         if abs(upper[i].y - lower[i].y) > EPS:
-            text = "Mouth is open"
-            color = (0, 0, 255)
-            ret = True
-            break
-    else:
-        text = "Mouth is closed"
-        color = (0, 255, 0)
-        ret = False
-    cv2.putText(draw_image, text, (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1.0, color)
-    return ret
+            return True
+    return False
 
 
-def apply_preset(preset_name: str, image, size):
-    coeff = 0.8
+def apply_preset(preset_name: str, image, size, color):
+    coeff = DRAW_COEFF
     h, w = size[:2]
     offset_x = round(w * (1 - coeff) / 2)
     offset_y = round(h * (1 - coeff) / 2)
@@ -151,30 +147,43 @@ def apply_preset(preset_name: str, image, size):
         return (round(point.x * h) + offset_x, round(point.y * w) + offset_y)
 
     if preset_name == "cat":
-        CatPreset.apply_preset(image, FACE_ITEMS["left_brow"], FACE_ITEMS["right_brow"], transform_func)
+        CatPreset.apply_preset(image, FACE_ITEMS["left_brow"], FACE_ITEMS["right_brow"], FACE_ITEMS["cheeks"], transform_func, color)
+    elif preset_name == "little_devil":
+        LittleDevilPreset.apply_preset(image, FACE_ITEMS["left_brow"], FACE_ITEMS["right_brow"], transform_func, color)
 
 
-def convert_image(image: 'np.ndarry[float]'):
-    size = (500, 500, 3)
-    new_image = draw_cirlce(size, COLORS["pink"])
+def convert_image(image: 'np.ndarry[float]', color_name, preset_name):
+    size = (600, 600, 3)
+    if COLORS.get(color_name) is None:
+        return None
+    color = COLORS[color_name]
+    new_image = draw_cirlce(size, color)
     res = get_coords_from_face(image)
     if res is None:
         return None
     face_size = res
     resize_all_points(face_size)
-    draw_lines(new_image, size, True)
-    apply_preset("cat", new_image, size)
+    draw_lines(new_image, size, color, True)
+    apply_preset(preset_name, new_image, size, color)
     return new_image
 
 
-def convert_video(video: 'np.ndarray[float]', frame_rate):
-    if frame_rate < 3:
-        return None
+def convert_video(video: 'np.ndarray[float]', color_name, preset_name, skip_frames=None):
+    step = 1 if skip_frames is None else skip_frames
     res_video = []
-    for i in range(0, len(video), frame_rate // 3):
+    for i in range(0, len(video), step):
         cur_frame = video[i]
-        converted = convert_image(cur_frame)
+        converted = convert_image(cur_frame, color_name, preset_name)
         if converted is None:
             continue
         res_video.append(converted)
-    return np.array(res_video)
+    return res_video
+
+
+def convert_video_to_gif(video: 'np.ndarray[float]', color_name, preset_name):
+    new_video = convert_video(video, color_name, preset_name, 10)
+    if new_video is None:
+        return None
+    new_video = [cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) for frame in new_video]
+    output = imageio.mimsave("<bytes>", new_video, format="gif")
+    return output
