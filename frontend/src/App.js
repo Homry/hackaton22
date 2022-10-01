@@ -11,7 +11,6 @@ import Basic from "./pages/Basic";
 
 function App() {
    const {token, setToken} = useToken();
-    console.log("token___", token)
     if (!token){
        return ( <Login setSession={setToken}/>)
     }

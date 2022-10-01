@@ -12,10 +12,10 @@ export default function Basic(props) {
                             <img src="prof.png" style={{height:100, width: 100}} alt="YOUR PICT"/>
                             <h1>Cyberducks</h1>
                             <hr/>
-                            <MenuItem>Сообщения <Link to="/chat" /></MenuItem>
-                            <MenuItem>Видео <Link to="/video" /></MenuItem>
-                            <MenuItem>Галерея <Link to="/storage" /></MenuItem>
-                            <MenuItem>Профиль <Link to="/" /></MenuItem>
+                            <MenuItem onClick={()=> window.location.href = '/chat'}>Сообщения </MenuItem>
+                            <MenuItem onClick={()=> window.location.href = '/video'}>Видео </MenuItem>
+                            <MenuItem onClick={()=> window.location.href = '/storage'}>Галерея </MenuItem>
+                            <MenuItem onClick={()=> window.location.href = '/'}>Профиль </MenuItem>
                             <footer
                                 style={{
                                     position: "fixed",
