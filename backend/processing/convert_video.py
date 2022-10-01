@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 import mediapipe as mp
 from processing.data import Point, FaceItem
+from processing.presets import CatPreset
 
 
 mesh_detector = detector = mp.solutions.face_mesh.FaceMesh(
@@ -18,13 +19,18 @@ FACE_ITEMS = {
     "inner_lips": FaceItem("inner_lips", [78, 191, 80, 81, 82, 13, 312, 311, 310, 415, 308, 324, 318, 402, 317, 14, 87, 178, 88, 95], True, draw=False),
     "right_eye": FaceItem("right_eye", [246, 161, 160, 159, 158, 157, 173, 133, 155, 154, 153, 145, 144, 163, 7, 33], True, draw=True),
     # "around_right_eye1": FaceItem("around_right_eye1", [467, 260, 259, 257, 258, 286, 414, 463, 341, 256, 252, 253, 254, 339, 255, 359], True, draw=False),
-    "around_right_eye2": FaceItem("around_right_eye2", [113, 225, 224, 223, 222, 221, 189, 244, 233, 232, 231, 230, 229, 228, 31, 226], True, draw=False),
-    "around_right_eye3": FaceItem("around_right_eye3", [143, 111, 117, 118, 119, 120, 121, 128, 245], False, draw=False),
+    "around_right_eye2": FaceItem("around_right_eye2", [113, 225, 224, 223, 222, 221, 189, 244, 233, 232, 231, 230, 229, 228, 31, 226], True, draw=False, tickness=2),
+    "around_right_eye3": FaceItem("around_right_eye3", [143, 111, 117, 118, 119, 120, 121, 128, 245], False, draw=False, tickness=1),
     "left_eye": FaceItem("left_eye", [466, 388, 387, 386, 385, 384, 398, 362, 382, 381, 380, 374, 373, 390, 249, 263], True),
     "around_left_eye1": FaceItem("around_left_eye1", [467, 260, 259, 257, 258, 286, 414, 463, 341, 256, 252, 253, 254, 339, 255, 359], True, draw=False),
+    "around_left_eye3": FaceItem("around_left_eye3", [372, 340, 346, 347, 348, 349, 350, 357, 465], False, draw=False   , tickness=1),
     "lips": FaceItem("lips", [61, 185, 40, 39, 37, 0, 267, 269, 270, 409, 291, 375, 321, 405, 314, 17, 84, 181, 91, 146], True, draw=False),
     "left_brow": FaceItem("left_brow", [46, 53, 52, 65, 55], False, 2),
     "right_brow": FaceItem("right_brow", [276, 283, 282, 295, 285], False, 2),
+    # "right_brow": FaceItem("right_brow", [276, 283, 282, 295, 285, 296, 334, 293, 383], True, 2),
+    # "left_brow": FaceItem("left_brow", [46, 55], False, 2),
+    # "right_brow": FaceItem("right_brow", [276, 285], False, 2),
+    "line1": FaceItem("line1", [412, 343, 277, 329, 330, 280, 376], False, 1, draw=False),
     "silhouette": FaceItem(
         "silhouette",
         [
@@ -32,36 +38,29 @@ FACE_ITEMS = {
             397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136,
             172, 58,  132, 93,  234, 127, 162, 21,  54,  103, 67,  109
         ], True, draw=False),
+    "leye": FaceItem("leye", [469, 470, 471, 472], True, tickness=1),
+    "reye": FaceItem("reye", [474, 475, 476, 477], True, tickness=1),
 }
-'''lipsUpperInner = [78, 191, 80, 81, 82, 13, 312, 311, 310, 415, 308]
-# lipsLowerInner = [78, 95, 88, 178, 87, 14, 317, 402, 318, 324, 308]
-lipsLowerInner = [95, 88, 178, 87, 14, 317, 402, 318, 324]
-rightEyeUpper0 = [246, 161, 160, 159, 158, 157, 173]
-rightEyeLower0 = [33, 7, 163, 144, 145, 153, 154, 155, 133]
-leftEyeUpper0 = [466, 388, 387, 386, 385, 384, 398]
-leftEyeLower0 = [263, 249, 390, 373, 374, 380, 381, 382, 362]
-# lipsUpperOuter = [61, 185, 40, 39, 37, 0, 267, 269, 270, 409, 291]
-lipsUpperOuter = [61, 185, 40, 39, 37, 0, 267, 269, 270, 409]
-lipsLowerOuter = [146, 91, 181, 84, 17, 314, 405, 321, 375, 291]
 
-rightEyebrowUpper = [46, 53, 52, 65, 55] #[156, 70, 63, 105, 66, 107, 55, 193]
-leftEyebrowUpper = [276, 283, 282, 295, 285] #[383, 300, 293, 334, 296, 336, 285, 417]
+EPS = 0.02
 
-silhouette = [
-    10,  338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288,
-    397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136,
-    172, 58,  132, 93,  234, 127, 162, 21,  54,  103, 67,  109
-]'''
-
-EPS = 0.023
+COLORS = {
+    "yellow": (0, 255, 255),
+    "green": (0, 255, 0),
+    "blue": (255, 0, 0),
+    "red": (0, 0, 255),
+    "purple": (128, 0, 128),
+    "pink": (180, 105, 255),
+}
 
 ### COLOR IS BGR!!!!!
 
-def draw_cirlce(size):
+def draw_cirlce(size, fill_color):
     coeff = 0.95
-    image = np.ones(size) * 255
+    image = np.ones(size, dtype=np.uint8) * 255
     h, w = size[:2]
-    image = cv2.circle(image, (w // 2, h // 2), round(w // 2 * coeff), (0, 255, 255), -1)
+    image = cv2.circle(image, (w // 2, h // 2), round(w // 2 * coeff), fill_color, -1)
+    # image = cv2.circle(image, (w // 2, h // 2), round(w // 2 * coeff), (0, 0, 255), -1)
     image = cv2.circle(image, (w // 2, h // 2), round(w // 2 * coeff), (0, 0, 0), 3)
     return image
 
@@ -140,16 +139,31 @@ def check_open_mouth(draw_image):
     return ret
 
 
+def apply_preset(preset_name: str, image, size):
+    coeff = 0.8
+    h, w = size[:2]
+    offset_x = round(w * (1 - coeff) / 2)
+    offset_y = round(h * (1 - coeff) / 2)
+    h *= coeff
+    w *= coeff
+
+    def transform_func(point):
+        return (round(point.x * h) + offset_x, round(point.y * w) + offset_y)
+
+    if preset_name == "cat":
+        CatPreset.apply_preset(image, FACE_ITEMS["left_brow"], FACE_ITEMS["right_brow"], transform_func)
+
+
 def convert_image(image: 'np.ndarry[float]'):
     size = (500, 500, 3)
-    new_image = draw_cirlce(size)
+    new_image = draw_cirlce(size, COLORS["pink"])
     res = get_coords_from_face(image)
     if res is None:
         return None
     face_size = res
     resize_all_points(face_size)
     draw_lines(new_image, size, True)
-    # check_open_mouth(new_image)
+    apply_preset("cat", new_image, size)
     return new_image
 
 
