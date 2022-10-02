@@ -14,13 +14,11 @@ mesh_detector = detector = mp.solutions.face_mesh.FaceMesh(
     min_tracking_confidence=0.9)
 
 FACE_ITEMS = {
-    # "nose": FaceItem("nose", [2, 1, 168], True),
     "nose": FaceItem("nose", [327, 1, 98, 168], True),
     "lips_inner_lower": FaceItem("lips_inner_lower", [95, 88, 178, 87, 14, 317, 402, 318, 324], False, draw=False),
     "lips_inner_upper": FaceItem("lips_inner_upper", [78, 191, 80, 81, 82, 13, 312, 311, 310, 415, 308], False, draw=False),
     "inner_lips": FaceItem("inner_lips", [78, 191, 80, 81, 82, 13, 312, 311, 310, 415, 308, 324, 318, 402, 317, 14, 87, 178, 88, 95], True, draw=False),
     "right_eye": FaceItem("right_eye", [246, 161, 160, 159, 158, 157, 173, 133, 155, 154, 153, 145, 144, 163, 7, 33], True, draw=True),
-    # "around_right_eye1": FaceItem("around_right_eye1", [467, 260, 259, 257, 258, 286, 414, 463, 341, 256, 252, 253, 254, 339, 255, 359], True, draw=False),
     "around_right_eye2": FaceItem("around_right_eye2", [113, 225, 224, 223, 222, 221, 189, 244, 233, 232, 231, 230, 229, 228, 31, 226], True, draw=False, tickness=2),
     "around_right_eye3": FaceItem("around_right_eye3", [143, 111, 117, 118, 119, 120, 121, 128, 245], False, draw=False, tickness=1),
     "left_eye": FaceItem("left_eye", [466, 388, 387, 386, 385, 384, 398, 362, 382, 381, 380, 374, 373, 390, 249, 263], True),
@@ -29,9 +27,6 @@ FACE_ITEMS = {
     "lips": FaceItem("lips", [61, 185, 40, 39, 37, 0, 267, 269, 270, 409, 291, 375, 321, 405, 314, 17, 84, 181, 91, 146], True, draw=False),
     "left_brow": FaceItem("left_brow", [46, 53, 52, 65, 55], False, 2),
     "right_brow": FaceItem("right_brow", [276, 283, 282, 295, 285], False, 2),
-    # "right_brow": FaceItem("right_brow", [276, 283, 282, 295, 285, 296, 334, 293, 383], True, 2),
-    # "left_brow": FaceItem("left_brow", [46, 55], False, 2),
-    # "right_brow": FaceItem("right_brow", [276, 285], False, 2),
     "line1": FaceItem("line1", [412, 343, 277, 329, 330, 280, 376], False, 1, draw=False),
     "silhouette": FaceItem(
         "silhouette",
@@ -40,13 +35,15 @@ FACE_ITEMS = {
             397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136,
             172, 58,  132, 93,  234, 127, 162, 21,  54,  103, 67,  109
         ], True, draw=False),
-    "leye": FaceItem("leye", [469, 470, 471, 472], True, tickness=1),
-    "reye": FaceItem("reye", [474, 475, 476, 477], True, tickness=1),
+    "leye": FaceItem("leye", [469, 470, 471, 472], True, tickness=1, draw=False),
+    #"leye": FaceItem("leye", [469, 471], True, tickness=1),
+    "reye": FaceItem("reye", [474, 475, 476, 477], True, tickness=1, draw=False),
     "cheeks": FaceItem("cheeks", [425, 205], False, tickness=1, draw=False),
 }
 
 EPS = 0.02
 DRAW_COEFF = 0.7
+SKIP_FRAMES = 7
 
 COLORS = {
     "yellow": (0, 255, 255),
@@ -58,6 +55,17 @@ COLORS = {
 }
 
 ### COLOR IS BGR!!!!!
+SIZE = (600, 600, 3)
+H, W = SIZE[:2]
+SIZE_OFFSET_X = round(W * (1 - DRAW_COEFF) / 2)
+SIZE_OFFSET_Y = round(H * (1 - DRAW_COEFF) / 2)
+H *= DRAW_COEFF
+W *= DRAW_COEFF
+
+def transform_func(point):
+    return (round(point.x * W) + SIZE_OFFSET_X, round(point.y * H) + SIZE_OFFSET_Y)
+
+####
 
 def draw_cirlce(size, fill_color):
     coeff = 0.95
@@ -94,16 +102,6 @@ def get_coords_from_face(image):
 
 
 def draw_lines(image, size, color, draw_lips=False):
-    coeff = DRAW_COEFF
-    h, w = size[:2]
-    offset_x = round(w * (1 - coeff) / 2)
-    offset_y = round(h * (1 - coeff) / 2)
-    h *= coeff
-    w *= coeff
-
-    def transform_func(point):
-        return (round(point.x * h) + offset_x, round(point.y * w) + offset_y)
-
     for face_item in FACE_ITEMS.values():
         face_item.draw_lines(image, transform_func)
     if draw_lips:
@@ -120,11 +118,11 @@ def resize_all_points(face_size):
     x_len = max_x - min_x
     y_len = max_y - min_y
 
-    def transform_func(point):
+    def resize_func(point):
         return (point.x - min_x) / x_len, (point.y - min_y) / y_len
 
     for face_item in FACE_ITEMS.values():
-        face_item.resize_saved_points(transform_func)
+        face_item.resize_saved_points(resize_func)
 
 
 def check_open_mouth(draw_image):
@@ -136,15 +134,6 @@ def check_open_mouth(draw_image):
 
 
 def apply_preset(preset_name: str, image, size, color):
-    coeff = DRAW_COEFF
-    h, w = size[:2]
-    offset_x = round(w * (1 - coeff) / 2)
-    offset_y = round(h * (1 - coeff) / 2)
-    h *= coeff
-    w *= coeff
-
-    def transform_func(point):
-        return (round(point.x * h) + offset_x, round(point.y * w) + offset_y)
 
     if preset_name == "cat":
         CatPreset.apply_preset(image, FACE_ITEMS["left_brow"], FACE_ITEMS["right_brow"], FACE_ITEMS["cheeks"], transform_func, color)
@@ -152,8 +141,38 @@ def apply_preset(preset_name: str, image, size, color):
         LittleDevilPreset.apply_preset(image, FACE_ITEMS["left_brow"], FACE_ITEMS["right_brow"], transform_func, color)
 
 
+def calculate_distance(point1, point2):
+    return ((point1.x - point2.x) ** 2 + (point1.y - point2.y) ** 2) ** 0.5
+
+
+def find_closest_points(points, point1, point2):
+    min_dist = calculate_distance(point1, points[0]) + calculate_distance(point2, points[0])
+    min_point = points[0]
+    for point in points[1:]:
+        cur_dist = calculate_distance(point1, point) + calculate_distance(point2, point)
+        if min_dist > cur_dist:
+            min_dist = cur_dist
+            min_point = point
+    return min_point
+
+
+def draw_eye(image, eye: FaceItem, eyelid: FaceItem, ):
+    left, right = eye.saved_landmarks[2], eye.saved_landmarks[0]
+    up, down = eye.saved_landmarks[1], eye.saved_landmarks[3]
+    new_points = [
+        left,
+        find_closest_points(eyelid.saved_landmarks, left, up),
+        find_closest_points(eyelid.saved_landmarks, right, up),
+        right,
+        find_closest_points(eyelid.saved_landmarks, right, down),
+        find_closest_points(eyelid.saved_landmarks, left, down),
+    ]
+    contour = [np.array([transform_func(p) for p in new_points], dtype=np.int32)]
+    cv2.drawContours(image, contour, -1, (0, 0, 0), -1)
+
+
 def convert_image(image: 'np.ndarry[float]', color_name, preset_name):
-    size = (600, 600, 3)
+    size = SIZE
     if COLORS.get(color_name) is None:
         return None
     color = COLORS[color_name]
@@ -164,6 +183,8 @@ def convert_image(image: 'np.ndarry[float]', color_name, preset_name):
     face_size = res
     resize_all_points(face_size)
     draw_lines(new_image, size, color, True)
+    draw_eye(new_image, FACE_ITEMS["leye"], FACE_ITEMS["right_eye"])
+    draw_eye(new_image, FACE_ITEMS["reye"], FACE_ITEMS["left_eye"])
     apply_preset(preset_name, new_image, size, color)
     return cv2.cvtColor(new_image, cv2.COLOR_BGR2RGB)
 
@@ -181,7 +202,7 @@ def convert_video(video: 'np.ndarray[float]', color_name, preset_name, skip_fram
 
 
 def convert_video_to_gif(video: 'np.ndarray[float]', color_name, preset_name):
-    new_video = convert_video(video, color_name, preset_name, 10)
+    new_video = convert_video(video, color_name, preset_name, SKIP_FRAMES)
     if new_video is None:
         return None
     new_video = [cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) for frame in new_video]
