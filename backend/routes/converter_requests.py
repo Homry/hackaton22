@@ -5,6 +5,7 @@ import io
 import numpy as np
 import tempfile
 from processing import convert_image as converter
+from processing import create_gif
 from app import app, db
 import gridfs
 
@@ -49,7 +50,20 @@ def convert_image_and_save_in_bd(token):
 
 @app.route('/save_gif/<token>', methods=['GET'])
 def save_gif(token):
-    print('here')
+    fs = gridfs.GridFS(db)
+    gif = []
+    for i in fs.find({'name': token}):
+        data = i.read()
+        tmp = np.array(Image.open(io.BytesIO(data)).convert('RGB'))
+        gif.append(tmp)
+    gif = np.array(gif)
+    print(gif.shape)
+    gif = create_gif(gif)
+    print(gif)
+    with open('tmp.gif', 'wb') as file:
+        file.write(gif)
+
+
     return {'error': 'not find face in the image'}, 200
 
 

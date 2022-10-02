@@ -21,7 +21,7 @@ export default function Video (props){
         setImgSrc(URL.createObjectURL(content))
         console.log(continue_)
         if (continue_){
-
+            save_gif()
         }
 
     }, [webcamRef, setImgSrc]);

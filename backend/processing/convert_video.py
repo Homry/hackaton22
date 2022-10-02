@@ -177,13 +177,18 @@ def convert_video(video: 'np.ndarray[float]', color_name, preset_name, skip_fram
         if converted is None:
             continue
         res_video.append(converted)
+    if len(res_video) == 0:
+        return None
     return res_video
 
+def create_gif(video):
+    output = imageio.mimsave("<bytes>", video, format="gif")
+    return output
 
-def convert_video_to_gif(video: 'np.ndarray[float]', color_name, preset_name):
-    new_video = convert_video(video, color_name, preset_name, 10)
+def convert_video_to_gif(video: 'np.ndarray[float]', color_name='yellow', preset_name=''):
+    new_video = convert_video(video, color_name, preset_name, None)
+
     if new_video is None:
         return None
-    new_video = [cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) for frame in new_video]
-    output = imageio.mimsave("<bytes>", new_video, format="gif")
-    return output
+    new_video = [cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) for frame in video]
+    return create_gif(new_video)
