@@ -3,6 +3,8 @@ from passlib.hash import pbkdf2_sha256
 from app import db
 import uuid
 
+db = db.auth
+
 class User:
     def start_session(self, user):
         del user['password']

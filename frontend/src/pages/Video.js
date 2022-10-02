@@ -6,6 +6,10 @@ const COLORS = {"yellow": "Желтый", "green": "Зеленый", "blue": "С
 const TYPES = {"standard": "Стандартный", "cat":"Кот", "little_devil":"Дьяволенок"}
 
 export default function Video (props){
+    useEffect(() => {
+        fetch(`http://127.0.0.1:5000/delete_img/${props.user['_id']}`).then()
+    }, [props.user])
+
     const webcamRef = React.useRef(null);
     const [imgSrc, setImgSrc] = React.useState(null);
     const [colors, setColors] = useState([]);

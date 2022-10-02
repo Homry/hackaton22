@@ -37,7 +37,8 @@ def convert_image():
 def convert_image_and_save_in_bd(token):
     raw = request.get_json()
     image = decode_image(raw)
-    fs = gridfs.GridFS(db)
+    dataBase = db.tmpGifs
+    fs = gridfs.GridFS(dataBase)
     if image is not None:
         with tempfile.NamedTemporaryFile(mode="wb", suffix='.png') as jpg:
             image = Image.fromarray(image)
@@ -51,9 +52,21 @@ def convert_image_and_save_in_bd(token):
     return {'error': 'not find face in the image'}, 408
 
 
+def delete(token):
+    dataBase = db.tmpGifs
+    for i in dataBase.fs.files.find({'name': token}):
+        dataBase.fs.chunks.delete_one({'files_id': i['_id']})
+    dataBase.fs.files.delete_many({'name': token})
+
+@app.route('/delete_img/<token>', methods=['GET'])
+def delete_img(token):
+    delete(token)
+    return {'status': 'ok'}, 200
+
 @app.route('/save_gif/<token>', methods=['GET'])
 def save_gif(token):
-    fs = gridfs.GridFS(db)
+    dataBase = db.tmpGifs
+    fs = gridfs.GridFS(dataBase)
     gif = []
     for i in fs.find({'name': token}):
         data = i.read()
@@ -62,10 +75,15 @@ def save_gif(token):
     gif = np.array(gif)
     print(gif.shape)
     gif = create_gif(gif)
-    
-
-
-    return {'error': 'not find face in the image'}, 200
+    delete(token)
+    dataBase = db.users_gifs
+    fs = gridfs.GridFS(dataBase)
+    with tempfile.NamedTemporaryFile(mode="wb", suffix='.gif') as gifFile:
+        gifFile.write(gif)
+        with open(gifFile.name, 'rb') as file:
+            content = file.read()
+        fs.put(content, name=token)
+    return {'status': 'ok'}, 200
 
 
 
