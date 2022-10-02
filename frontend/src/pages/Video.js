@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from "react";
 import Webcam from "react-webcam";
 
-const COLORS = ["yellow", "green", "blue", "red", "purple", "pink", "gray"]
-const TYPES = ["standard", "cat", "little_devil"]
+const COLORS = {"yellow": "Желтый", "green": "Зеленый", "blue": "Синий", "red": "Красный", "purple": "Фиолетовый", "pink": "Розовый", "gray": "Серый"}
+const TYPES = {"standard": "Стандартный", "cat":"Кот", "little_devil":"Дьяволенок"}
 
 export default function Video (props){
     const webcamRef = React.useRef(null);
@@ -10,16 +10,15 @@ export default function Video (props){
     const [colors, setColors] = useState([]);
     const [types, setTypes] = useState([true]);
     const [continue_, setContinue_] = useState(true);
-    console.log(props.user)
 
     useEffect(()=>{
         let colors_arr = []
         let types_arr = []
-        for (let color of COLORS){
-            colors_arr.push(<option key={color} value={color}>{color}</option>)
+        for (let color of Object.keys(COLORS)){
+            colors_arr.push(<option key={color} value={color}>{COLORS[color]}</option>)
         }
-        for (let type of TYPES){
-            types_arr.push(<option key={type} value={type}>{type}</option>)
+        for (let type of Object.keys(TYPES)){
+            types_arr.push(<option key={type} value={type}>{TYPES[type]}</option>)
         }
         setColors(colors_arr)
         setTypes(types_arr)
@@ -38,7 +37,6 @@ export default function Video (props){
         })
         const content = await response.blob();
         setImgSrc(URL.createObjectURL(content))
-        console.log(continue_)
         if (continue_){
 
         }
@@ -56,7 +54,6 @@ export default function Video (props){
         })
         const content = await response.blob();
         setImgSrc(URL.createObjectURL(content))
-        console.log(continue_)
         if (continue_){
             capture();
         }
@@ -66,25 +63,33 @@ export default function Video (props){
     return (
 
         <>
-            <select id="color">
-                {colors}
-            </select>
-            <select id="type">
-                {types}
-            </select>
-            <button onClick={()=>{capture()}}>preload</button>
-            <button onClick={()=> window.location.reload()}>stop preload</button>
-            <button onClick={save_gif}>create_gif</button>
-            <button onClick={()=> {
-                fetch(`http://127.0.0.1:5000/save_gif/${props.user['_id']}`).then(res => {
-                    window.location.reload()
-                })
 
-            }}>save gif</button>
+            <table>
+                <tbody>
+                <tr>
+                    <select id="color">
+                        {colors}
+                    </select>
+                    <select id="type">
+                        {types}
+                    </select>
+                    <button onClick={()=>{capture()}}>Сгенерировать эмоцию</button>
+                    <button onClick={()=> window.location.reload()}>Остановить</button>
+                    <button onClick={save_gif}>Начать запись гифки</button>
+                    <button onClick={()=> {
+                        fetch(`http://127.0.0.1:5000/save_gif/${props.user['_id']}`).then(res => {
+                            window.location.reload()
+                        })
+                    }}>Сохранить гифку</button>
+                </tr>
+                </tbody>
+            </table>
+
             <Webcam
                 audio={false}
                 ref={webcamRef}
                 screenshotFormat="image/png"
+                height={600}
             />
 
             {imgSrc && (
