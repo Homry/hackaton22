@@ -159,19 +159,61 @@ def find_closest_points(points, point1, point2):
 def draw_eye(image, eye: FaceItem, eyelid: FaceItem, ):
     left, right = eye.saved_landmarks[2], eye.saved_landmarks[0]
     up, down = eye.saved_landmarks[1], eye.saved_landmarks[3]
-    new_points = [
-        left,
-        find_closest_points(eyelid.saved_landmarks, left, up),
-        find_closest_points(eyelid.saved_landmarks, right, up),
-        right,
-        find_closest_points(eyelid.saved_landmarks, right, down),
-        find_closest_points(eyelid.saved_landmarks, left, down),
-    ]
+    max_up = min(eyelid.saved_landmarks, key=lambda x: x.y)
+    min_down = max(eyelid.saved_landmarks, key=lambda x: x.y)
+    if up.y < max_up.y:
+        up_points = [
+            find_closest_points(eyelid.saved_landmarks, left, up),
+            find_closest_points(eyelid.saved_landmarks, right, up),
+        ]
+    else:
+        up_points = [up]
+    if down.y > min_down.y:
+        down_points = [
+            find_closest_points(eyelid.saved_landmarks, right, down),
+            find_closest_points(eyelid.saved_landmarks, left, down),
+        ]
+    else:
+        down_points = [down]
+    new_points = [left] + up_points + [right] + down_points
     contour = [np.array([transform_func(p) for p in new_points], dtype=np.int32)]
     cv2.drawContours(image, contour, -1, (0, 0, 0), -1)
 
 
-def convert_image(image: 'np.ndarry[float]', color_name, preset_name):
+def convert_eyes(image, convert_type="real"):
+    if convert_type == "real":
+        draw_eye(image, FACE_ITEMS["leye"], FACE_ITEMS["right_eye"])
+        draw_eye(image, FACE_ITEMS["reye"], FACE_ITEMS["left_eye"])
+    elif convert_type == "big":
+        margin = 0.03
+        coeff = 1.3
+        def conv_eye(eye: FaceItem):
+            max_x = max(eye.saved_landmarks, key=lambda x: x.x)
+            min_x = min(eye.saved_landmarks, key=lambda x: x.x)
+            max_y = max(eye.saved_landmarks, key=lambda x: x.y)
+            min_y = min(eye.saved_landmarks, key=lambda x: x.y)
+            eye.saved_landmarks = [
+                Point(max_x.x - margin, min_y.y),
+                Point(min_x.x + margin, min_y.y),
+                Point(min_x.x, min_y.y + margin),
+                Point(min_x.x, max_y.y * coeff - margin),
+                Point(min_x.x + margin, max_y.y * coeff),
+                Point(max_x.x - margin, max_y.y * coeff),
+                Point(max_x.x, max_y.y * coeff - margin),
+                Point(max_x.x, min_y.y + margin),
+            ]
+            return (max_y.y * coeff - min_y.y) / 3
+        y_off = conv_eye(FACE_ITEMS["left_eye"])
+        for point in FACE_ITEMS["reye"].saved_landmarks:
+            point.y += y_off
+        y_off = conv_eye(FACE_ITEMS["right_eye"])
+        for point in FACE_ITEMS["leye"].saved_landmarks:
+            point.y += y_off
+        draw_eye(image, FACE_ITEMS["leye"], FACE_ITEMS["right_eye"])
+        draw_eye(image, FACE_ITEMS["reye"], FACE_ITEMS["left_eye"])
+
+
+def convert_image(image: 'np.ndarry[float]', color_name, preset_name, convert_eyes_type="real"):
     size = SIZE
     if COLORS.get(color_name) is None:
         return None
@@ -182,9 +224,8 @@ def convert_image(image: 'np.ndarry[float]', color_name, preset_name):
         return None
     face_size = res
     resize_all_points(face_size)
+    convert_eyes(new_image, convert_eyes_type)
     draw_lines(new_image, size, color, True)
-    draw_eye(new_image, FACE_ITEMS["leye"], FACE_ITEMS["right_eye"])
-    draw_eye(new_image, FACE_ITEMS["reye"], FACE_ITEMS["left_eye"])
     apply_preset(preset_name, new_image, size, color)
     return cv2.cvtColor(new_image, cv2.COLOR_BGR2RGB)
 
@@ -207,8 +248,7 @@ def create_gif(video):
     return output
 
 def convert_video_to_gif(video: 'np.ndarray[float]', color_name='yellow', preset_name=''):
-    new_video = convert_video(video, color_name, preset_name, None)
-
+    new_video = convert_video(video, color_name, preset_name, SKIP_FRAMES)
     if new_video is None:
         return None
     new_video = [cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) for frame in video]
