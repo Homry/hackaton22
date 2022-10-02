@@ -1,8 +1,12 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import Webcam from "react-webcam";
 
 
 export default function Video (props){
+    useEffect(() => {
+        fetch(`http://127.0.0.1:5000/delete_img/${props.user['_id']}`).then()
+    }, [props.user])
+
     const webcamRef = React.useRef(null);
     const [imgSrc, setImgSrc] = React.useState(null);
     const [continue_, setContinue_] = useState(true);

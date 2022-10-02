@@ -1,6 +1,6 @@
 from flask import Flask, request, session, jsonify
 from users.models import User
-from app import app, db
+from app import app
 
 @app.route('/user/singup', methods=['POST'])
 def singup():
