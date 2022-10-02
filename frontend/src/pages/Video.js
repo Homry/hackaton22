@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
 import Webcam from "react-webcam";
 
+
 const COLORS = {"yellow": "Желтый", "green": "Зеленый", "blue": "Синий", "red": "Красный", "purple": "Фиолетовый", "pink": "Розовый", "gray": "Серый"}
 const TYPES = {"standard": "Стандартный", "cat":"Кот", "little_devil":"Дьяволенок"}
 
@@ -67,16 +68,16 @@ export default function Video (props){
             <table>
                 <tbody>
                 <tr>
-                    <select id="color">
+                    <select style={{background: "#333", color: "white"}} id="color">
                         {colors}
                     </select>
-                    <select id="type">
+                    <select style={{background: "#333", color: "white"}} id="type">
                         {types}
                     </select>
-                    <button onClick={()=>{capture()}}>Сгенерировать эмоцию</button>
-                    <button onClick={()=> window.location.reload()}>Остановить</button>
-                    <button onClick={save_gif}>Начать запись гифки</button>
-                    <button onClick={()=> {
+                    <button style={{background: "#333", color: "white"}} onClick={()=>{capture()}}>Сгенерировать эмоцию</button>
+                    <button style={{background: "#333", color: "white"}} onClick={()=> window.location.reload()}>Остановить</button>
+                    <button style={{background: "#333", color: "white"}} onClick={save_gif}>Начать запись гифки</button>
+                    <button style={{background: "#333", color: "white"}} onClick={()=> {
                         fetch(`http://127.0.0.1:5000/save_gif/${props.user['_id']}`).then(res => {
                             window.location.reload()
                         })
