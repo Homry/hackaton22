@@ -23,3 +23,14 @@ def get_user(token):
     user = db.auth.users.find_one({'_id': token})
     return {'user': user}, 200
 
+@app.route('/getAllUsers/<token>', methods=['GET'])
+def getAllUsers(token):
+    user = db.auth.users.find({'_id': {'$ne': token}})
+    users = []
+    for i in user:
+        tmp = i
+        del tmp['password']
+        users.append(tmp)
+    print(users)
+    return {'users': users}, 200
+

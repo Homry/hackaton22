@@ -6,7 +6,7 @@ function MainNavbar() {
             <div className="topnav">
                 <a className="active" href="/">Профиль</a>
                 <a href="/video">Сгенерировать эмоцию</a>
-                <a href="/storage">Галерея</a>
+                <a href="/storage">Пользователи</a>
                 <a href="/chat">Чат</a>
             </div>
         </Wrapper>

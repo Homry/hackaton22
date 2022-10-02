@@ -1,28 +1,30 @@
 import VideoFromDevice from "../components/VideoFromDevice";
 import {useEffect, useState} from "react";
+import Post from "../components/Post";
+
 
 export default function Storage(props) {
-    console.log(props.user['_id'])
-    const [links, setLinks] = useState({'links':[]});
+    const [users, setUsers] = useState(null)
     useEffect(()=>{
-        fetch(`http://127.0.0.1:5000/get_gifs/${props.user['_id']}`).then(res=> res.json())
+        fetch(`http://127.0.0.1:5000/getAllUsers/${props.user['_id']}`).then(res=> res.json())
             .then(res => {
-                setLinks(res);
-                console.log(res.length)
+                setUsers(res['users']);
+                console.log(res['users']);
             })
-    }, [])
-    return (
-        <>
-            {
-                Array.from(Array(links['links'].length)).map((_, index) => (
+    },[])
+    if (users !== null){
+        return (
+            <>
+                {Array.from(Array(users.length)).map((_, index) => (
                     <div>
-                        <img src={links['links'][index]}/>
-                        <a href={links['download'][index]}>Скачать</a>
+                        <a href={`/page/${users[index]['_id']}`}> {users[index]['name']}</a>
                     </div>
 
-                ))
-            }
+                ))}
+            </>
+        )
+    }
 
-        </>
-    );
+
+
 }
