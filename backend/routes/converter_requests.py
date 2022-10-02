@@ -21,7 +21,6 @@ def convert_image():
     raw = request.get_json()
     color = request.args.get("color")
     type = request.args.get("type")
-    print(color, type)
     image = decode_image(raw, color, type)
     if image is not None:
         with tempfile.NamedTemporaryFile(mode="wb", suffix='.png') as jpg:
@@ -36,7 +35,9 @@ def convert_image():
 @app.route('/convert_image/<token>', methods=['POST'])
 def convert_image_and_save_in_bd(token):
     raw = request.get_json()
-    image = decode_image(raw)
+    color = request.args.get("color")
+    type = request.args.get("type")
+    image = decode_image(raw, color, type)
     dataBase = db.tmpGifs
     fs = gridfs.GridFS(dataBase)
     if image is not None:

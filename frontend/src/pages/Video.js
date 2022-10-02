@@ -33,7 +33,7 @@ export default function Video (props){
     const save_gif = React.useCallback(async () => {
         const imageSrc = webcamRef.current.getScreenshot();
 
-        const response = await fetch(`http://127.0.0.1:5000/convert_image/${props.user['_id']}`, {
+        const response = await fetch(`http://127.0.0.1:5000/convert_image/${props.user['_id']}?color=${document.querySelector('#color').value}&type=${document.querySelector('#type').value}`, {
             method: "POST",
             body: JSON.stringify(imageSrc),
             headers: {
