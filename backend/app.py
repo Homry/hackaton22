@@ -18,6 +18,8 @@ from routes import converter_requests, get_gifs
 def home():
     return 'Home'
 
-
-    #return {'image': "test"}
+@app.route('/getUser/<token>', methods=['GET'])
+def get_user(token):
+    user = db.auth.users.find_one({'_id': token})
+    return {'user': user}, 200
 

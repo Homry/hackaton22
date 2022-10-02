@@ -7,6 +7,7 @@ import Storage from "./pages/Storage";
 import MyPage from "./pages/MyPage";
 import useToken from "./login/useToken";
 import MainNavbar from "./components/MainNavbar";
+import User from "./pages/User";
 
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
                   <Route path="/video" element={<Video user={token}/>}/>
                   <Route path="/storage" element={<Storage user={token}/>}/>
                   <Route path="/" element={<MyPage user={token}/>}/>
+                  <Route path="/page/:id" element={<User user={token}/>}/>
               </Routes>
           </BrowserRouter>
       </>
