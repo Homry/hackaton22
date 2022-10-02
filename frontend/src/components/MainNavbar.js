@@ -8,6 +8,10 @@ function MainNavbar() {
                 <a href="/video">Сгенерировать эмоцию</a>
                 <a href="/storage">Пользователи</a>
                 <a href="/chat">Чат</a>
+                <a href='#' onClick={()=> {
+                    sessionStorage.clear()
+                    window.location.reload()
+                }}> log out</a>
             </div>
         </Wrapper>
     );

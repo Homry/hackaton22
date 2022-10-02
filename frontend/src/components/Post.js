@@ -5,8 +5,11 @@ export default function Post(props){
     return(
         <div>
             <p>{props.you} create emotion</p>
-            <img src={props.link}/>
-            <a href='#' onClick={()=>saveAs(props.link)}>Download</a>
+            <img style={{left: "33%"}} src={props.link}/>
+            {props.you === 'you' &&
+                <a style={{background: "#04AA6D", color: "white", left: "33%"}} href='#' onClick={()=>saveAs(props.link)}>Download</a>
+            }
+
         </div>
     )
 }
