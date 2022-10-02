@@ -59,9 +59,7 @@ def save_gif(token):
     gif = np.array(gif)
     print(gif.shape)
     gif = create_gif(gif)
-    print(gif)
-    with open('tmp.gif', 'wb') as file:
-        file.write(gif)
+    
 
 
     return {'error': 'not find face in the image'}, 200
