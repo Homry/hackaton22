@@ -9,16 +9,19 @@ from app import app, db
 import gridfs
 
 
-def decode_image(raw):
+def decode_image(raw, color="yellow", type=""):
     image = np.asarray(Image.open(io.BytesIO(base64.b64decode(raw.split(',')[1]))).convert('RGB'))
     print(image.shape)
-    return converter(image, "red", "cat")
+    return converter(image, color, type)
 
 
 @app.route('/convert_image', methods=['POST'])
 def convert_image():
     raw = request.get_json()
-    image = decode_image(raw)
+    color = request.args.get("color")
+    type = request.args.get("type")
+    print(color, type)
+    image = decode_image(raw, color, type)
     if image is not None:
         with tempfile.NamedTemporaryFile(mode="wb", suffix='.png') as jpg:
             image = Image.fromarray(image)
