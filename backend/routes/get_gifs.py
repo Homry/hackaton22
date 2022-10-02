@@ -6,6 +6,7 @@ import numpy as np
 import tempfile
 from processing import convert_image as converter
 from processing import create_gif
+from bson.objectid import ObjectId
 from app import app, db
 import gridfs
 
@@ -23,5 +24,7 @@ def get_gifs(token):
 def get_gif(token):
     dataBase = db.users_gifs
     fs = gridfs.GridFS(dataBase)
-    gif = fs.find_one({'_id': token})
-    print(gif)
+    gif = fs.find_one({'_id': ObjectId(token)})
+    with tempfile.NamedTemporaryFile(mode="wb", suffix='.gif') as gifFile:
+        gifFile.write(gif.read())
+        return send_file(gifFile.name, mimetype='image/gif')
